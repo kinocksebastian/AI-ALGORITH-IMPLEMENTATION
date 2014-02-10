@@ -1,0 +1,348 @@
+from random import randint
+checker = True
+
+board = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+
+queens = []
+
+print "Enter the positions of queen"
+for i in range(4):
+	j = raw_input()
+	k = raw_input()
+	j = int(j)
+	k = int(k)
+	board[j][k] = 1
+	queens.append([j,k])
+
+print "The Initial State"
+
+for i in board:
+	print i
+
+#function to compute no of attacks for each move
+
+def no_of_attacks(i,j):
+	count = 0
+	
+	#checking in right diagonal down
+	temp_i = i
+	temp_j = j
+	temp_i += 1
+        temp_j += 1
+	while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+		if(board[temp_i][temp_j] == 1):
+			count = count + 1
+			
+		temp_i += 1
+                temp_j += 1	
+	
+	#checking in right diagonal up
+	temp_i = i  
+        temp_j = j
+        temp_i -= 1
+        temp_j -= 1
+	while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+                if(board[temp_i][temp_j] == 1):
+                        count = count + 1
+                temp_i -= 1
+                temp_j -= 1
+	
+	#checking down the column
+	temp_i = i  
+        temp_j = j
+        temp_i += 1
+        while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+                if(board[temp_i][temp_j] == 1):
+                        count = count + 1
+                temp_i += 1
+                
+	#checking up the column
+	temp_i = i  
+        temp_j = j
+        temp_i -= 1
+        while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+                if(board[temp_i][temp_j] == 1):
+                        count = count + 1
+                temp_i -= 1
+	
+	#checking left diagonal to up
+	temp_i = i  
+        temp_j = j
+        temp_i -= 1
+	temp_j +=1
+	while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+                if(board[temp_i][temp_j] == 1):
+                        count = count + 1
+                temp_i -= 1
+		temp_j += 1
+	
+	#checking left Diagonal to down
+	temp_i = i
+        temp_j = j
+        temp_i += 1
+        temp_j -=1
+	while temp_i <= 3 and temp_i >= 0 and temp_j <= 3 and temp_j >= 0:
+                if(board[temp_i][temp_j] == 1):
+                        count = count + 1
+                temp_i += 1
+                temp_j -= 1
+
+	
+	return count
+
+
+        
+
+#function to check weather goal state is reached or not
+def goal_state(): 
+        flag = 0;
+	for k in range(4):
+		for l in range(4):
+			if(board[k][l] == 1):
+				temp = no_of_attacks(k,l)
+				if(temp > 0): 
+					flag = 1
+	return flag
+#checking wheather there is atleast one queue in a row 
+
+def check():
+	
+	k = [] 
+	for i in queens:
+		k.append(i[0])
+	
+	return (list(set([0,1,2,3]) - set(k))) 
+
+row_without_queen = check()
+
+
+#Finding no of queens in a row
+
+q_count = [0,0,0,0]
+for i in queens:
+	for j in range(4):
+		if(i[0] == j):
+			q_count[j] = q_count[j] + 1
+
+
+#distributing queen to each row 
+
+for i in range(4):
+	f = q_count[i]
+	if(f > 1):
+		temp = i
+		for j in range(4):
+			if (temp == j):
+				for k in range(4):
+					if (f>1):
+						if(board[temp][k] == 1):
+							board[row_without_queen[0]][k] = 1
+							board[temp][k] = 0
+							f = f-1
+							del row_without_queen[0]	
+
+print board		
+
+fl = goal_state()
+if (fl == 0):
+	print "the input is solution"
+	exit()
+
+			
+#for i in board:
+#	print i
+
+
+
+#hill climbing algorithm for 4queen
+def hill_climb():
+	#print "inside hill climb"
+	count = []
+	move_queen = {}
+	for i in range(4):
+		for j in range(4):
+			if(board[i][j] == 1):
+				if(j-1 >= 0):
+ 	 				left = no_of_attacks(i,j-1)
+				else:
+					left = 10	
+				if(j+1 <= 3):
+					
+ 					right = no_of_attacks(i,j+1)
+				else:
+					right = 10
+
+				if(left < right):
+					move_queen[i] = "left"
+					count.append(left)
+				elif(right < left):
+					move_queen[i] = "right"
+					count.append(right)
+				elif(right == left):
+					move_queen[i] = "rl"
+					count.append(left)
+	
+	
+	#function to move queens
+	def move_qun():
+		#raw_input()
+		#print "inside mov queen"
+		small_temp = 0
+		small = count[0]
+		flag = 0
+		temp = count[0]
+		for i in count:
+			if(temp != i):
+				flag = 1
+
+		for i in count:
+                                if(i <= small):
+					small_temp = i
+                                        small = count.index(i)
+		cn = 0
+		for i in count:
+			if(small_temp == i):
+				cn = cn + 1
+			    
+			
+		if(flag == 1) and (cn <= 0):
+			
+		
+			#print "inside move queen if"
+			#raw_input()
+			print "No of attacks while moving queen in each row "
+			print count
+			print "Least is for the queen in ",+small
+
+			for i in range(4):
+				if(board[small][i] == 1):
+					
+					if(move_queen[small] == "left"):
+						print "Going to move queen in row ", +small ,"left"
+						for f in board:
+							print f
+						board[small][i] = 0
+						board[small][i-1] = 1
+						print "after moving" 
+						for f in board:
+                                                	print f
+						return
+				
+					elif(move_queen[small] == "right"):
+						print "Going to move queen in row ", +small ,"right"
+                                        	for f in board:
+                                                	print f
+						board[small][i]	= 0
+                                		board[small][i+1] = 1
+						print "after moving" 
+                                        	for f in board:
+                                                	print f
+
+						return
+					elif(move_queen[small] == "rl"):
+						ran = randint(0,1)
+						#print "inside rl "
+						#raw_input()
+						if(ran == 0):	
+                                             		print "Going to move queen in row ", +small ,"right"
+                                                	for f in board:
+                                                        	print f
+                                                	board[small][i] = 0
+                                                	board[small][i+1] = 1
+                                                	print "after moving"
+                                                	for f in board:
+                                                        	print f
+								return
+						else:
+							print "Going to move queen in row ", +small ,"left"
+                                                        for f in board:
+                                                               	print f
+                                                        board[small][i] = 0
+                                                        board[small][i-1] = 1
+                                                        print "after moving"
+                                                        for f in board:
+                                                               	print f
+                                                               	return
+
+		else:
+			#print "inside move queen else"
+			#raw_input()
+
+			small = randint(0,3)
+			print "No of attacks while moving queen in each row "
+			print count
+			print "Least is for the queen in ",+small
+			for i in range(4):
+				if(board[small][i] == 1):
+					if(move_queen[small] == "left"):
+                                        	print "Going to move queen in row ", +small ,"left"
+                                                for f in board:
+                                                        print f
+                                                board[small][i] = 0
+                                                board[small][i-1] = 1
+                                                print "after moving"
+                                                for f in board:
+                                                        print f
+                                                return
+
+                                        elif(move_queen[small] == "right"):
+                                                print "Going to move queen in row ", +small ,"right"
+                                                for f in board:
+                                                        print f
+                                                board[small][i] = 0
+                                                board[small][i+1] = 1
+                                                print "after moving"
+                                                for f in board:
+                                                        print f
+
+                                                return
+                                        elif(move_queen[small] == "rl"):
+                                                ran = randint(0,1)
+						#print "inside else rl"
+						#raw_input()
+                                                if(ran == 0):
+                                                        print "Going to move queen in row ", +small ,"right"
+                                                        for f in board:
+                                                                print f
+                                                        board[small][i] = 0
+                                                        board[small][i+1] = 1
+							print "after moving"
+                                                        for f in board:
+                                                                print f
+                                                        return
+                                                else:
+                                                       	print "Going to move queen in row ", +small ,"left"
+                                                        for f in board:
+                                                                print f
+                                                        board[small][i] = 0
+                                                        board[small][i-1] = 1
+                                                       	print "after moving"
+                                                        for f in board:
+                                                                print f
+                                                        return
+
+
+
+ 
+
+ 
+       
+	move_qun()
+	reached_goal = goal_state()
+	if(reached_goal == 0):
+		print " Hurray !!! Atlast a Solution " 
+		checker = False
+		for i in board:
+			print i
+		return 
+	else:
+		hill_climb()
+
+while(checker):
+	hill_climb()
+	print "huh atlast"
+	exit()
+
+				
+	
+					
